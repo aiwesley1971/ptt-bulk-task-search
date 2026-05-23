@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "PTT Bulk Task Search",
+  "version": "3.1",
+  "description": "PTT Task Key Bulk Search - Log-in first, Runs in a new tab",
+  "permissions": [
+    "tabs",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://live.pttgps.com/*"
+  ],
+  "action": {
+    "default_popup": "launcher.html",
+    "default_title": "PTT Bulk Task Search"
+  },
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
