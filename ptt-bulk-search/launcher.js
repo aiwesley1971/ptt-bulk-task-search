@@ -75,8 +75,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   btnGoogleLogin.addEventListener('click', doSignIn);
 
   // ── Open Search Window ──
-  btnOpen.addEventListener('click', () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('app.html') });
+  btnOpen.addEventListener('click', async () => {
+    await chrome.tabs.create({ url: chrome.runtime.getURL('app.html') });
     window.close();
   });
 
