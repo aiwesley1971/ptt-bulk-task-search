@@ -21,7 +21,7 @@
     .hdr {
       background: linear-gradient(135deg, #1a3c5e, #2471a3);
       color: #fff;
-      padding: 14px 24px;
+      padding: 10px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center
@@ -39,6 +39,37 @@
       padding: 3px 9px;
       border-radius: 12px
     }
+
+    .hdr-user {
+      display: flex;
+      align-items: center;
+      gap: 8px
+    }
+
+    .hdr-user img {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.4)
+    }
+
+    .hdr-user span {
+      font-size: 11px;
+      opacity: .85
+    }
+
+    .btn-signout {
+      font-size: 11px;
+      padding: 3px 10px;
+      background: rgba(255,255,255,.15);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.3);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .15s
+    }
+
+    .btn-signout:hover { background: rgba(255,255,255,.28) }
 
     .main {
       max-width: 1100px;
@@ -380,7 +411,12 @@
 <body>
   <div class="hdr">
     <h1>🔍 PTT Bulk Task Search</h1>
-    <span class="ver">v2.2</span>
+    <div class="hdr-user">
+      <img id="hdrPic" src="" alt="" style="display:none">
+      <span id="hdrEmail"></span>
+      <button class="btn-signout" id="btnSignOut">Sign out</button>
+      <span class="ver">v4.0</span>
+    </div>
   </div>
   <div class="main">
     <!-- 왼쪽: 설정 패널 -->
@@ -425,6 +461,7 @@
       </div>
     </div>
   </div>
+  <script src="auth.js"></script>
   <script src="app.js"></script>
 </body>
 
