@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PTT Bulk Task Search",
-  "version": "4.1",
+  "version": "4.3",
   "description": "PTT Task Key Bulk Search with Google Group Auth - Runs in a new tab",
   "permissions": [
     "tabs",
@@ -16,7 +16,8 @@
     "https://live.pttgps.com/*",
     "https://www.googleapis.com/*",
     "https://script.google.com/*",
-    "https://script.googleusercontent.com/*"
+    "https://script.googleusercontent.com/*",
+    "https://accounts.google.com/*"
   ],
   "action": {
     "default_popup": "launcher.html",

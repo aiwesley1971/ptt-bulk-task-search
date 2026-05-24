@@ -1,80 +1,74 @@
-/* PTT Bulk Task Search – auth.js v4.2
+/* PTT Bulk Task Search – auth.js v4.3
  *
- * Authentication flow:
- *  1. chrome.identity.getAuthToken → Google OAuth token (Chrome Extension type)
- *  2. access_token → Google userinfo API → get name/picture
- *  3. access_token → GAS endpoint → verify token + check Google Group membership
- *  4. If allowed: save user to chrome.storage.local
- *
- * Sign-out: removes cached token + clears local storage
+ * Flow:
+ *  1. chrome.identity.getAuthToken  → Google access token
+ *  2. GAS ?token=TOKEN              → tokeninfo 검증 + 그룹 멤버 확인
+ *  3. Google userinfo API           → name / picture
+ *  4. 결과를 chrome.storage.local 에 저장
  */
 
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXHRBwMGZsfs6xLEQh7wFQ1TOfWmaO4g8i50pZtAYSBcaAj-JRNiVmay_2XCVgTJFv6g/exec';
-
 const AUTH_KEY = 'pttUser';
 
-/** Returns the stored user object, or null if not signed in. */
+/** 저장된 사용자 반환. 없으면 null. */
 async function getUser() {
   return new Promise(resolve => {
     chrome.storage.local.get(AUTH_KEY, d => resolve(d[AUTH_KEY] || null));
   });
 }
 
-/** Sign in via chrome.identity.getAuthToken → GAS group check. */
+/** Google 로그인 → GAS 그룹 체크 → 사용자 저장 */
 async function signIn() {
-  return new Promise((resolve, reject) => {
-    chrome.identity.getAuthToken({ interactive: true }, async (token) => {
-      if (chrome.runtime.lastError) {
-        reject(new Error(chrome.runtime.lastError.message));
-        return;
-      }
-      if (!token) {
-        reject(new Error('No access token received.'));
-        return;
-      }
-
-      try {
-        // ── 1. Get profile info ──
-        const uResp = await fetch(
-          'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + token
-        );
-        const uInfo = await uResp.json();
-
-        // ── 2. GAS: verify token + check Google Group membership ──
-        const gasResp = await fetch(GAS_URL + '?' + new URLSearchParams({ token }));
-        const gasData = await gasResp.json();
-
-        if (gasData.allowed === true) {
-          const user = {
-            email:   gasData.user,
-            name:    uInfo.name    || gasData.user,
-            picture: uInfo.picture || ''
-          };
-          await chrome.storage.local.set({ [AUTH_KEY]: user });
-          resolve(user);
-
-        } else if (gasData.status === 'denied') {
-          // Remove cached token so next attempt shows account picker
-          chrome.identity.removeCachedAuthToken({ token });
-          const err = new Error('not_in_group');
-          err.userEmail = gasData.user;
-          err.joinUrl   = gasData.joinUrl;
-          reject(err);
-
-        } else {
-          reject(new Error(gasData.message || 'Authorization check failed.'));
-        }
-
-      } catch (e) {
-        reject(new Error('Failed to verify access: ' + e.message));
-      }
+  // 1. Chrome identity로 access token 획득
+  const token = await new Promise((resolve, reject) => {
+    chrome.identity.getAuthToken({ interactive: true }, (t) => {
+      if (chrome.runtime.lastError) { reject(new Error(chrome.runtime.lastError.message)); return; }
+      if (!t) { reject(new Error('Failed to get access token.')); return; }
+      resolve(t);
     });
   });
+
+  // 2. GAS 호출 (tokeninfo 검증 + 그룹 멤버 확인)
+  let gasData;
+  try {
+    const resp = await fetch(GAS_URL + '?token=' + encodeURIComponent(token));
+    const ct = resp.headers.get('content-type') || '';
+    if (!ct.includes('json')) {
+      throw new Error('Unexpected response from server. Please try again.');
+    }
+    gasData = await resp.json();
+  } catch (e) {
+    throw new Error('Group check failed: ' + e.message);
+  }
+
+  if (gasData.status === 'error') {
+    throw new Error(gasData.message || 'Authorization error.');
+  }
+
+  if (gasData.status === 'denied') {
+    chrome.identity.removeCachedAuthToken({ token });
+    const err = new Error('not_in_group');
+    err.userEmail = gasData.user;
+    err.joinUrl   = gasData.joinUrl;
+    throw err;
+  }
+
+  // 3. 프로필 정보 (이름, 사진) 가져오기
+  let name = gasData.user, picture = '';
+  try {
+    const uResp = await fetch('https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + token);
+    const uInfo = await uResp.json();
+    name    = uInfo.name    || gasData.user;
+    picture = uInfo.picture || '';
+  } catch (_) { /* 프로필 실패해도 이메일로 진행 */ }
+
+  // 4. 저장
+  const user = { email: gasData.user, name, picture };
+  await chrome.storage.local.set({ [AUTH_KEY]: user });
+  return user;
 }
 
-/**
- * Sign out: removes cached token and clears stored user + search results.
- */
+/** 로그아웃: 캐시 토큰 제거 + 로컬 데이터 삭제 */
 async function signOut() {
   return new Promise(resolve => {
     chrome.identity.getAuthToken({ interactive: false }, (token) => {
