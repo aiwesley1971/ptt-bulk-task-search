@@ -15,11 +15,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   const userName        = document.getElementById('userName');
   const userEmail       = document.getElementById('userEmail');
 
-  function showLogin()      { stateLoading.style.display='none'; stateLogin.style.display='';     stateLoggedIn.style.display='none'; stateNeedsAuth.style.display='none'; }
-  function showLoggedIn()   { stateLoading.style.display='none'; stateLogin.style.display='none'; stateLoggedIn.style.display='';    stateNeedsAuth.style.display='none'; }
+  function showLogin()      { stateLoading.style.display='none'; stateLogin.style.display='block';  stateLoggedIn.style.display='none';  stateNeedsAuth.style.display='none'; }
+  function showLoggedIn()   { stateLoading.style.display='none'; stateLogin.style.display='none';  stateLoggedIn.style.display='block'; stateNeedsAuth.style.display='none'; }
   function showNeedsAuth(url) {
     stateLoading.style.display='none'; stateLogin.style.display='none';
-    stateLoggedIn.style.display='none'; stateNeedsAuth.style.display='';
+    stateLoggedIn.style.display='none'; stateNeedsAuth.style.display='block';
     btnAuthorize.onclick = () => chrome.tabs.create({ url });
     btnRetry.onclick = () => { stateNeedsAuth.style.display='none'; doSignIn(); };
   }
