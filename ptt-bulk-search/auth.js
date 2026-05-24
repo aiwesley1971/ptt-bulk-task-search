@@ -18,7 +18,7 @@
  * ────────────────────────────────────────────────────────────────────────────
  */
 
-const OAUTH_CLIENT_ID = '849553074462-apoauvr2ulungcg6oma2scgdi74uos3d.apps.googleusercontent.com';
+const OAUTH_CLIENT_ID = '849553074462-ehjs2ue3ucu0jm2l7ti4bndqj3modsiu.apps.googleusercontent.com';
 
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXHRBwMGZsfs6xLEQh7wFQ1TOfWmaO4g8i50pZtAYSBcaAj-JRNiVmay_2XCVgTJFv6g/exec';
 
