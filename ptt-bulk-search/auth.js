@@ -29,11 +29,14 @@ async function signIn() {
     const resp = await fetch(GAS_URL, { credentials: 'include' });
     const ct = resp.headers.get('content-type') || '';
     if (!ct.includes('json')) {
-      throw new Error('Google 계정에 로그인되어 있는지 확인 후 다시 시도해주세요.');
+      // HTML 반환 = 사용자가 GAS 앱을 아직 승인하지 않은 상태
+      const err = new Error('needs_auth');
+      err.gasUrl = GAS_URL;
+      throw err;
     }
     data = await resp.json();
   } catch (e) {
-    throw new Error(e.message || 'Connection failed. Please try again.');
+    throw e;
   }
 
   if (data.status === 'error') {

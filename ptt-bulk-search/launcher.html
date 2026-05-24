@@ -63,6 +63,23 @@
       white-space: pre-line;
     }
 
+    #stateNeedsAuth { display: none; padding: 16px; text-align: center }
+    #stateNeedsAuth p { font-size: 11px; opacity: .85; line-height: 1.6; margin-bottom: 12px }
+    .btn-authorize {
+      display: block; width: 100%; padding: 9px;
+      background: #e67e22; color: #fff; border: none;
+      border-radius: 6px; font-size: 12px; font-weight: 700;
+      cursor: pointer; margin-bottom: 8px
+    }
+    .btn-authorize:hover { background: #d35400 }
+    .btn-retry {
+      display: block; width: 100%; padding: 7px;
+      background: transparent; color: rgba(255,255,255,.6);
+      border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
+      font-size: 11px; cursor: pointer
+    }
+    .btn-retry:hover { background: rgba(255,255,255,.08) }
+
     /* ── Logged-in state ── */
     #stateLoggedIn { display: none; padding: 14px 16px 16px }
     .user-row {
@@ -129,6 +146,14 @@
 
   <!-- Loading -->
   <div id="stateLoading">Loading...</div>
+
+  <!-- One-time GAS authorization needed -->
+  <div id="stateNeedsAuth">
+    <p>⚠️ One-time setup required.<br>
+    Click below to open the authorization page, approve access, then click <strong>Try Again</strong>.</p>
+    <button class="btn-authorize" id="btnAuthorize">🔗 Open Authorization Page</button>
+    <button class="btn-retry" id="btnRetry">↩ Try Again</button>
+  </div>
 
   <!-- Not signed in -->
   <div id="stateLogin" style="display:none">

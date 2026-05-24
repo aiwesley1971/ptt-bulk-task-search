@@ -1,19 +1,28 @@
-/* PTT Bulk Task Search – launcher.js v4.1 */
+/* PTT Bulk Task Search – launcher.js v4.4 */
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const stateLoading   = document.getElementById('stateLoading');
-  const stateLogin     = document.getElementById('stateLogin');
-  const stateLoggedIn  = document.getElementById('stateLoggedIn');
-  const btnGoogleLogin = document.getElementById('btnGoogleLogin');
-  const loginError     = document.getElementById('loginError');
-  const btnOpen        = document.getElementById('btnOpen');
-  const btnLogout      = document.getElementById('btnLogout');
-  const userPic        = document.getElementById('userPic');
-  const userName       = document.getElementById('userName');
-  const userEmail      = document.getElementById('userEmail');
+  const stateLoading    = document.getElementById('stateLoading');
+  const stateLogin      = document.getElementById('stateLogin');
+  const stateLoggedIn   = document.getElementById('stateLoggedIn');
+  const stateNeedsAuth  = document.getElementById('stateNeedsAuth');
+  const btnGoogleLogin  = document.getElementById('btnGoogleLogin');
+  const loginError      = document.getElementById('loginError');
+  const btnOpen         = document.getElementById('btnOpen');
+  const btnLogout       = document.getElementById('btnLogout');
+  const btnAuthorize    = document.getElementById('btnAuthorize');
+  const btnRetry        = document.getElementById('btnRetry');
+  const userPic         = document.getElementById('userPic');
+  const userName        = document.getElementById('userName');
+  const userEmail       = document.getElementById('userEmail');
 
-  function showLogin()    { stateLoading.style.display = 'none'; stateLogin.style.display = '';     stateLoggedIn.style.display = 'none'; }
-  function showLoggedIn() { stateLoading.style.display = 'none'; stateLogin.style.display = 'none'; stateLoggedIn.style.display = '';    }
+  function showLogin()      { stateLoading.style.display='none'; stateLogin.style.display='';     stateLoggedIn.style.display='none'; stateNeedsAuth.style.display='none'; }
+  function showLoggedIn()   { stateLoading.style.display='none'; stateLogin.style.display='none'; stateLoggedIn.style.display='';    stateNeedsAuth.style.display='none'; }
+  function showNeedsAuth(url) {
+    stateLoading.style.display='none'; stateLogin.style.display='none';
+    stateLoggedIn.style.display='none'; stateNeedsAuth.style.display='';
+    btnAuthorize.onclick = () => chrome.tabs.create({ url });
+    btnRetry.onclick = () => { stateNeedsAuth.style.display='none'; doSignIn(); };
+  }
 
   function renderUser(user) {
     if (user.picture) { userPic.src = user.picture; userPic.style.display = ''; }
@@ -39,29 +48,31 @@ document.addEventListener('DOMContentLoaded', async () => {
   const user = await getUser();
   if (user) { renderUser(user); } else { showLogin(); }
 
-  // ── Google Sign-In ──
-  btnGoogleLogin.addEventListener('click', async () => {
+  // ── Sign-In logic (shared) ──
+  async function doSignIn() {
     loginError.innerHTML = '';
     btnGoogleLogin.disabled = true;
     btnGoogleLogin.textContent = 'Signing in...';
-
     try {
       const user = await signIn();
       renderUser(user);
     } catch (e) {
-      if (e.message === 'not_in_group') {
-        // Not a group member → show join link
+      if (e.message === 'needs_auth') {
+        showNeedsAuth(e.gasUrl);
+      } else if (e.message === 'not_in_group') {
         loginError.innerHTML =
           `<strong>${e.userEmail}</strong> is not an authorized member.<br>` +
-          (e.joinUrl
-            ? `<a href="${e.joinUrl}" target="_blank" style="color:#f1948a;">Request access →</a>`
-            : '');
+          (e.joinUrl ? `<a href="${e.joinUrl}" target="_blank" style="color:#f1948a;">Request access →</a>` : '');
+        resetLoginBtn();
       } else {
         loginError.textContent = e.message || 'Sign-in failed. Please try again.';
+        resetLoginBtn();
       }
-      resetLoginBtn();
     }
-  });
+  }
+
+  // ── Google Sign-In button ──
+  btnGoogleLogin.addEventListener('click', doSignIn);
 
   // ── Open Search Window ──
   btnOpen.addEventListener('click', () => {
