@@ -1,23 +1,16 @@
 {
   "manifest_version": 3,
   "name": "PTT Bulk Task Search",
-  "version": "4.3",
+  "version": "4.4",
   "description": "PTT Task Key Bulk Search with Google Group Auth - Runs in a new tab",
   "permissions": [
     "tabs",
-    "storage",
-    "identity"
+    "storage"
   ],
-  "oauth2": {
-    "client_id": "849553074462-ehjs2ue3ucu0jm2l7ti4bndqj3modsiu.apps.googleusercontent.com",
-    "scopes": ["openid", "email", "profile"]
-  },
   "host_permissions": [
     "https://live.pttgps.com/*",
-    "https://www.googleapis.com/*",
     "https://script.google.com/*",
-    "https://script.googleusercontent.com/*",
-    "https://accounts.google.com/*"
+    "https://script.googleusercontent.com/*"
   ],
   "action": {
     "default_popup": "launcher.html",

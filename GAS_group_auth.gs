@@ -1,70 +1,41 @@
-/**
- * PTT Bulk Task Search – GAS Group Auth v2
- *
- * Deployment: Execute as "Me (admin)" / Who can access: "Anyone with Google Account"
- *
- * Flow:
- *  1. Extension calls: GET ?token=ACCESS_TOKEN
- *  2. This script verifies the token via Google tokeninfo API
- *  3. Extracts the verified email from tokeninfo
- *  4. Checks membership in the Google Group
- *  5. Returns JSON { status, allowed, user, message, [joinUrl] }
- */
-
-const GROUP_EMAIL = "lge-wpc@googlegroups.com";
-
 function doGet(e) {
+  const groupEmail = "lge-wpc@googlegroups.com";
+
   try {
-    const token = e.parameter.token;
-    if (!token) {
-      return jsonOut({ status: "error", message: "Missing token." });
-    }
+    // 1. 현재 접속한 사용자의 이메일 가져오기
+    const userEmail = Session.getActiveUser().getEmail();
 
-    // ── Step 1: Verify access_token and extract email via Google tokeninfo ──
-    const tokenResp = UrlFetchApp.fetch(
-      "https://oauth2.googleapis.com/tokeninfo?access_token=" + encodeURIComponent(token),
-      { muteHttpExceptions: true }
-    );
-    const tokenInfo = JSON.parse(tokenResp.getContentText());
+    // 2. 그룹 정보 가져오기
+    const group = GroupsApp.getGroupByEmail(groupEmail);
 
-    if (tokenInfo.error_description || !tokenInfo.email) {
-      return jsonOut({ status: "error", message: "Invalid or expired token. Please sign in again." });
-    }
-
-    const email = tokenInfo.email;
-
-    // ── Step 2: Check Google Group membership ──
-    const group = GroupsApp.getGroupByEmail(GROUP_EMAIL);
     if (!group) {
-      return jsonOut({ status: "error", message: "Group not found." });
+      throw new Error("그룹을 찾을 수 없습니다.");
     }
 
-    const isMember = group.hasUser(email);
+    // 3. 멤버 여부 확인
+    const isMember = group.hasUser(userEmail);
 
     if (isMember) {
-      return jsonOut({
+      return ContentService.createTextOutput(JSON.stringify({
         status: "success",
         allowed: true,
-        user: email,
+        user: userEmail,
         message: "Authorized member."
-      });
+      })).setMimeType(ContentService.MimeType.JSON);
     } else {
-      return jsonOut({
+      return ContentService.createTextOutput(JSON.stringify({
         status: "denied",
         allowed: false,
-        user: email,
-        message: "Not an authorized member. Please request access.",
+        user: userEmail,
+        message: "No Authorized member. Apply here",
         joinUrl: "https://groups.google.com/g/lge-wpc"
-      });
+      })).setMimeType(ContentService.MimeType.JSON);
     }
 
   } catch (err) {
-    return jsonOut({ status: "error", message: err.message });
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: err.message
+    })).setMimeType(ContentService.MimeType.JSON);
   }
-}
-
-function jsonOut(obj) {
-  return ContentService
-    .createTextOutput(JSON.stringify(obj))
-    .setMimeType(ContentService.MimeType.JSON);
 }
