@@ -20,7 +20,7 @@
 
 const OAUTH_CLIENT_ID = 'REPLACE_WITH_YOUR_CLIENT_ID.apps.googleusercontent.com';
 
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwZWW_s7YwkfPvOTBDrKL8iCSMyIMdP8Ikr1GLwQLb-vspYkuM3mskpfTbsMIUwUxJZlw/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXHRBwMGZsfs6xLEQh7wFQ1TOfWmaO4g8i50pZtAYSBcaAj-JRNiVmay_2XCVgTJFv6g/exec';
 
 const AUTH_KEY = 'pttUser';
 
