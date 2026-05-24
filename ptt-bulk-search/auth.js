@@ -1,24 +1,13 @@
-/* PTT Bulk Task Search – auth.js v4.1
+/* PTT Bulk Task Search – auth.js v4.2
  *
  * Authentication flow:
- *  1. launchWebAuthFlow → Google OAuth popup (independent of browser account)
- *     - Always shows account picker (prompt=select_account)
+ *  1. chrome.identity.getAuthToken → Google OAuth token (Chrome Extension type)
  *  2. access_token → Google userinfo API → get name/picture
  *  3. access_token → GAS endpoint → verify token + check Google Group membership
  *  4. If allowed: save user to chrome.storage.local
  *
- * ── SETUP REQUIRED ──────────────────────────────────────────────────────────
- *  1. Go to https://console.cloud.google.com/
- *  2. APIs & Services → Credentials → Create → OAuth 2.0 Client ID
- *     · Application type: Web application
- *     · Authorized redirect URIs: add the value of chrome.identity.getRedirectURL()
- *       (Open browser console in the extension popup and run: chrome.identity.getRedirectURL())
- *       Format: https://<extension-id>.chromiumapp.org/
- *  3. Copy the client_id below.
- * ────────────────────────────────────────────────────────────────────────────
+ * Sign-out: removes cached token + clears local storage
  */
-
-const OAUTH_CLIENT_ID = '849553074462-ehjs2ue3ucu0jm2l7ti4bndqj3modsiu.apps.googleusercontent.com';
 
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwXHRBwMGZsfs6xLEQh7wFQ1TOfWmaO4g8i50pZtAYSBcaAj-JRNiVmay_2XCVgTJFv6g/exec';
 
@@ -31,87 +20,69 @@ async function getUser() {
   });
 }
 
-/**
- * Sign in with Google via launchWebAuthFlow.
- * Opens an account picker independently of the browser's signed-in account.
- * Resolves with user object { email, name, picture } on success.
- */
+/** Sign in via chrome.identity.getAuthToken → GAS group check. */
 async function signIn() {
-  const redirectURL = chrome.identity.getRedirectURL();
-
-  const authURL = 'https://accounts.google.com/o/oauth2/v2/auth?' + new URLSearchParams({
-    client_id:     OAUTH_CLIENT_ID,
-    response_type: 'token',
-    redirect_uri:  redirectURL,
-    scope:         'openid email profile',
-    prompt:        'select_account'   // Always show account picker → independent of browser account
-  });
-
   return new Promise((resolve, reject) => {
-    chrome.identity.launchWebAuthFlow(
-      { url: authURL, interactive: true },
-      async (responseURL) => {
-        if (chrome.runtime.lastError) {
-          reject(new Error(chrome.runtime.lastError.message));
-          return;
-        }
-        if (!responseURL) {
-          reject(new Error('Authentication cancelled.'));
-          return;
-        }
-
-        // Extract access_token from URL fragment (#access_token=...&...)
-        const fragment = new URL(responseURL).hash.substring(1);
-        const token = new URLSearchParams(fragment).get('access_token');
-        if (!token) {
-          reject(new Error('No access token received.'));
-          return;
-        }
-
-        try {
-          // ── 1. Get profile info (name, picture) ──
-          const uResp = await fetch(
-            'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + token
-          );
-          const uInfo = await uResp.json();
-
-          // ── 2. GAS: verify token + check Google Group membership ──
-          const gasResp = await fetch(GAS_URL + '?' + new URLSearchParams({ token }));
-          const gasData = await gasResp.json();
-
-          if (gasData.allowed === true) {
-            const user = {
-              email:   gasData.user,
-              name:    uInfo.name    || gasData.user,
-              picture: uInfo.picture || ''
-            };
-            await chrome.storage.local.set({ [AUTH_KEY]: user });
-            resolve(user);
-
-          } else if (gasData.status === 'denied') {
-            const err = new Error('not_in_group');
-            err.userEmail = gasData.user;
-            err.joinUrl   = gasData.joinUrl;
-            reject(err);
-
-          } else {
-            reject(new Error(gasData.message || 'Authorization check failed.'));
-          }
-
-        } catch (e) {
-          reject(new Error('Failed to verify access: ' + e.message));
-        }
+    chrome.identity.getAuthToken({ interactive: true }, async (token) => {
+      if (chrome.runtime.lastError) {
+        reject(new Error(chrome.runtime.lastError.message));
+        return;
       }
-    );
+      if (!token) {
+        reject(new Error('No access token received.'));
+        return;
+      }
+
+      try {
+        // ── 1. Get profile info ──
+        const uResp = await fetch(
+          'https://www.googleapis.com/oauth2/v1/userinfo?access_token=' + token
+        );
+        const uInfo = await uResp.json();
+
+        // ── 2. GAS: verify token + check Google Group membership ──
+        const gasResp = await fetch(GAS_URL + '?' + new URLSearchParams({ token }));
+        const gasData = await gasResp.json();
+
+        if (gasData.allowed === true) {
+          const user = {
+            email:   gasData.user,
+            name:    uInfo.name    || gasData.user,
+            picture: uInfo.picture || ''
+          };
+          await chrome.storage.local.set({ [AUTH_KEY]: user });
+          resolve(user);
+
+        } else if (gasData.status === 'denied') {
+          // Remove cached token so next attempt shows account picker
+          chrome.identity.removeCachedAuthToken({ token });
+          const err = new Error('not_in_group');
+          err.userEmail = gasData.user;
+          err.joinUrl   = gasData.joinUrl;
+          reject(err);
+
+        } else {
+          reject(new Error(gasData.message || 'Authorization check failed.'));
+        }
+
+      } catch (e) {
+        reject(new Error('Failed to verify access: ' + e.message));
+      }
+    });
   });
 }
 
 /**
- * Sign out: clears stored user and search results.
- * The Google OAuth token expires on its own; no revocation needed for launchWebAuthFlow.
+ * Sign out: removes cached token and clears stored user + search results.
  */
 async function signOut() {
   return new Promise(resolve => {
-    chrome.storage.local.remove([AUTH_KEY, 'pttResults'], resolve);
+    chrome.identity.getAuthToken({ interactive: false }, (token) => {
+      if (token) {
+        fetch('https://accounts.google.com/o/oauth2/revoke?token=' + token);
+        chrome.identity.removeCachedAuthToken({ token });
+      }
+      chrome.storage.local.remove([AUTH_KEY, 'pttResults'], resolve);
+    });
   });
 }

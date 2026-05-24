@@ -8,6 +8,10 @@
     "storage",
     "identity"
   ],
+  "oauth2": {
+    "client_id": "849553074462-ehjs2ue3ucu0jm2l7ti4bndqj3modsiu.apps.googleusercontent.com",
+    "scopes": ["openid", "email", "profile"]
+  },
   "host_permissions": [
     "https://live.pttgps.com/*",
     "https://www.googleapis.com/*",
