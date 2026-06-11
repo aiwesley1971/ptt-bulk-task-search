@@ -1,5 +1,4 @@
-
-/* PTT Bulk Task Search – app.js v2.4 */
+/* PTT Bulk Task Search – app.js v4.0 */
 
 const BASE = 'https://live.pttgps.com/track/asig/search.php';
 const DETAIL_BASE = 'https://live.pttgps.com/track/asig_alt/displaya_new.php';
@@ -16,7 +15,35 @@ let stopFlag = false;
 let results = [];
 let running = false;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // ── Auth check: redirect to launcher if not signed in ──
+  const user = await getUser();
+  if (!user) {
+    document.body.innerHTML =
+      '<div style="font-family:Segoe UI,Arial,sans-serif;text-align:center;padding:60px;color:#555;">' +
+      '<p style="font-size:15px;margin-bottom:12px;">🔒 Please sign in first.</p>' +
+      '<p style="font-size:12px;color:#888;">Click the extension icon to sign in with Google.</p>' +
+      '</div>';
+    return;
+  }
+
+  // ── Render user info in header ──
+  const hdrPic   = document.getElementById('hdrPic');
+  const hdrEmail = document.getElementById('hdrEmail');
+  if (user.picture) { hdrPic.src = user.picture; hdrPic.style.display = ''; }
+  hdrEmail.textContent = user.email;
+
+  // ── Sign-out button ──
+  document.getElementById('btnSignOut').addEventListener('click', async () => {
+    if (!confirm('Sign out from PTT Bulk Task Search?')) return;
+    await signOut();
+    document.body.innerHTML =
+      '<div style="font-family:Segoe UI,Arial,sans-serif;text-align:center;padding:60px;color:#555;">' +
+      '<p style="font-size:15px;">Signed out. You can close this tab.</p>' +
+      '</div>';
+  });
+
+  // ── Main UI ──
   document.getElementById('tabStatus').addEventListener('click', () => setMode('status'));
   document.getElementById('tabDetail').addEventListener('click', () => setMode('detail'));
   document.getElementById('keys').addEventListener('input', updateKeyCount);
@@ -401,7 +428,7 @@ function exportCSV() {
     });
   }
 
-  const csv = '\uFEFF' + headers.map(esc).join(',') + '\n' + rows.join('\n');
+  const csv = '﻿' + headers.map(esc).join(',') + '\n' + rows.join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
