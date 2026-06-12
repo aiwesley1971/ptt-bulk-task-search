@@ -1,15 +1,15 @@
 {
   "manifest_version": 3,
-  "name": "PTT Bulk Task Search",
-  "version": "4.4",
-  "description": "PTT Task Key Bulk Search with Google Group Auth - Runs in a new tab",
+  "name": "PTT Search Hub",
+  "version": "5.0",
+  "description": "PTT Task Key, Model Code, and Jira Issue Key search on live.pttgps.com with Google Group Auth",
   "permissions": [
     "tabs",
     "storage",
     "identity"
   ],
   "oauth2": {
-    "client_id": "849553074462-ehjs2ue3ucu0jm2l7ti4bndqj3modsiu.apps.googleusercontent.com",
+    "client_id": "390605028262-mrfkoicfcoat0e06t25bk1dhjgp89oog.apps.googleusercontent.com",
     "scopes": ["https://www.googleapis.com/auth/userinfo.email"]
   },
   "host_permissions": [
@@ -19,7 +19,7 @@
   ],
   "action": {
     "default_popup": "launcher.html",
-    "default_title": "PTT Bulk Task Search"
+    "default_title": "PTT Search Hub"
   },
   "icons": {
     "16": "icon16.png",

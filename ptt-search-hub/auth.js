@@ -1,4 +1,4 @@
-/* PTT Bulk Task Search – auth.js v4.4
+/* PTT Search Hub – auth.js v5.0
  *
  * Chrome Extension: chrome.identity.getAuthToken() 방식
  *
@@ -33,10 +33,10 @@ async function signIn() {
     });
   });
 
-  // 2. GAS 호출 (access_token 파라미터로 전달)
+  // 2. GAS 호출 (access_token 파라미터로 전달, Google 세션 쿠키 미전송)
   let data;
   try {
-    const resp = await fetch(GAS_URL + '?access_token=' + encodeURIComponent(token));
+    const resp = await fetch(GAS_URL + '?access_token=' + encodeURIComponent(token), { credentials: 'omit' });
     data = await resp.json();
   } catch (e) {
     throw new Error('Failed to connect to authorization server.');
@@ -66,6 +66,6 @@ async function signIn() {
 /** 로그아웃: 로컬 저장 데이터 삭제 */
 async function signOut() {
   return new Promise(resolve => {
-    chrome.storage.local.remove([AUTH_KEY, 'pttResults'], resolve);
+    chrome.storage.local.remove([AUTH_KEY, 'pttResults', 'hubResults'], resolve);
   });
 }

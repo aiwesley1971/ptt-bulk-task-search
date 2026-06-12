@@ -1,28 +1,19 @@
-/* PTT Bulk Task Search – launcher.js v4.4 */
+/* PTT Search Hub – launcher.js v5.0 */
 
 document.addEventListener('DOMContentLoaded', async () => {
   const stateLoading    = document.getElementById('stateLoading');
   const stateLogin      = document.getElementById('stateLogin');
   const stateLoggedIn   = document.getElementById('stateLoggedIn');
-  const stateNeedsAuth  = document.getElementById('stateNeedsAuth');
   const btnGoogleLogin  = document.getElementById('btnGoogleLogin');
   const loginError      = document.getElementById('loginError');
   const btnOpen         = document.getElementById('btnOpen');
   const btnLogout       = document.getElementById('btnLogout');
-  const btnAuthorize    = document.getElementById('btnAuthorize');
-  const btnRetry        = document.getElementById('btnRetry');
   const userPic         = document.getElementById('userPic');
   const userName        = document.getElementById('userName');
   const userEmail       = document.getElementById('userEmail');
 
-  function showLogin()      { stateLoading.style.display='none'; stateLogin.style.display='block';  stateLoggedIn.style.display='none';  stateNeedsAuth.style.display='none'; }
-  function showLoggedIn()   { stateLoading.style.display='none'; stateLogin.style.display='none';  stateLoggedIn.style.display='block'; stateNeedsAuth.style.display='none'; }
-  function showNeedsAuth(url) {
-    stateLoading.style.display='none'; stateLogin.style.display='none';
-    stateLoggedIn.style.display='none'; stateNeedsAuth.style.display='block';
-    btnAuthorize.onclick = () => chrome.tabs.create({ url });
-    btnRetry.onclick = () => { stateNeedsAuth.style.display='none'; doSignIn(); };
-  }
+  function showLogin()    { stateLoading.style.display='none'; stateLogin.style.display='block';  stateLoggedIn.style.display='none'; }
+  function showLoggedIn() { stateLoading.style.display='none'; stateLogin.style.display='none';  stateLoggedIn.style.display='block'; }
 
   function renderUser(user) {
     if (user.picture) { userPic.src = user.picture; userPic.style.display = ''; }
@@ -48,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const user = await getUser();
   if (user) { renderUser(user); } else { showLogin(); }
 
-  // ── Sign-In logic (shared) ──
+  // ── Sign-In logic ──
   async function doSignIn() {
     loginError.innerHTML = '';
     btnGoogleLogin.disabled = true;
@@ -57,9 +48,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const user = await signIn();
       renderUser(user);
     } catch (e) {
-      if (e.message === 'needs_auth') {
-        showNeedsAuth(e.gasUrl);
-      } else if (e.message === 'not_in_group') {
+      if (e.message === 'not_in_group') {
         loginError.innerHTML =
           `<strong>${e.userEmail}</strong> is not an authorized member.<br>` +
           (e.joinUrl ? `<a href="${e.joinUrl}" target="_blank" style="color:#f1948a;">Request access →</a>` : '');

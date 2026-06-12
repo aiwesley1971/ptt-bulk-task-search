@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PTT Search Hub</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+
+<body>
+  <header class="app-header">
+    <span class="dot"></span>
+    <h1>PTT Search Hub</h1>
+    <span class="ver">v5.0</span>
+
+    <!-- Main search-type tabs -->
+    <nav class="main-tabs">
+      <button class="main-tab active" id="tabTask">🔑 Task Key</button>
+      <button class="main-tab" id="tabModel">📦 Model Code</button>
+      <button class="main-tab" id="tabJira">🎫 Jira Key</button>
+    </nav>
+
+    <div class="hdr-user" id="hdrUser" style="display:none">
+      <img id="hdrPic" src="" alt="" style="display:none">
+      <span class="email" id="hdrEmail"></span>
+      <button class="hdr-signout" id="btnSignOut">Sign out</button>
+    </div>
+  </header>
+
+  <div class="main-container">
+    <!-- Left: Settings Panel -->
+    <div class="settings-panel">
+      <h2>Search Settings</h2>
+
+      <!-- Task sub-mode (Status / Detail) — visible only on Task tab -->
+      <div id="taskSubModes">
+        <div class="mode-tabs">
+          <button class="mode-tab active" id="subStatus">📋 Status</button>
+          <button class="mode-tab" id="subDetail">🔍 Detail</button>
+        </div>
+      </div>
+
+      <!-- Mode description -->
+      <div class="mode-desc" id="modeDesc"></div>
+
+      <!-- Input -->
+      <div class="field-group">
+        <label for="searchInput" id="inputLabel">Task Keys</label>
+        <textarea id="searchInput" rows="8" placeholder=""></textarea>
+        <p class="input-counter" id="inputCounter">0 entered</p>
+      </div>
+
+      <button class="start-btn" id="startBtn">&#9654; Start Search</button>
+
+      <div class="action-row">
+        <button class="export-btn" id="exportBtn" disabled>&#8595; Export CSV</button>
+        <button class="clear-all-btn" id="clearAllBtn">&#128465; Clear All</button>
+      </div>
+
+      <div class="progress-section" id="progressSection">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+        <p class="progress-text" id="progressText">Initializing...</p>
+      </div>
+
+      <div class="status-box" id="statusBox">Enter search terms and click Start Search.</div>
+    </div>
+
+    <!-- Right: Results Panel -->
+    <div class="results-panel">
+      <h2>
+        Search Results
+        <span class="results-count" id="resultsCount" style="display:none"></span>
+      </h2>
+      <div id="resultsContainer">
+        <div class="results-empty">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8" />
+            <path d="m21 21-4.35-4.35" />
+          </svg>
+          <span>Results will appear here when you start the search.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>
