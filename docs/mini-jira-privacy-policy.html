@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy – Mini Jira Sidebar</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      max-width: 760px;
+      margin: 48px auto;
+      padding: 0 24px 64px;
+      color: #2c3e50;
+      line-height: 1.7;
+    }
+    h1 {
+      font-size: 24px;
+      color: #0b3d91;
+      border-bottom: 2px solid #1a73e8;
+      padding-bottom: 10px;
+      margin-bottom: 6px;
+    }
+    .meta { font-size: 13px; color: #888; margin-bottom: 32px; }
+    h2 { font-size: 16px; color: #0b3d91; margin-top: 32px; }
+    p, li { font-size: 14px; }
+    ul { padding-left: 20px; }
+    li { margin-bottom: 6px; }
+    .highlight {
+      background: #eaf2ff;
+      border-left: 4px solid #1a73e8;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      font-size: 14px;
+      margin: 24px 0;
+    }
+    a { color: #1a73e8; }
+  </style>
+</head>
+<body>
+
+  <h1>Privacy Policy</h1>
+  <p class="meta">Mini Jira Sidebar &nbsp;·&nbsp; Last updated: September 10, 2026</p>
+
+  <div class="highlight">
+    <strong>Summary:</strong> This extension uses Google Sign-In only to verify that you
+    belong to an authorized Google Group. Your Jira credentials are stored only on your
+    device and used only to call your own Jira instance directly. No Jira, PTT, or
+    comment/issue data is ever collected or transmitted to the developer.
+  </div>
+
+  <h2>1. Overview</h2>
+  <p>
+    Mini Jira Sidebar ("the Extension") is a Chrome browser extension that shows a
+    signed-in user's assigned Jira Cloud issues in a browser side panel, and provides
+    two-way lookup between a Jira issue and its linked task on the internal PTT system
+    (<a href="https://live.pttgps.vip" target="_blank">live.pttgps.vip</a>). Access is
+    restricted to members of a specific Google Group. This policy describes what data
+    the Extension accesses and how it is handled.
+  </p>
+
+  <h2>2. Data We Access</h2>
+  <p>The Extension accesses the following data solely to provide its core functionality:</p>
+  <ul>
+    <li><strong>Google Account email address, name, and profile picture</strong> — used
+      at sign-in to verify Google Group membership (see Section 4)</li>
+    <li><strong>Jira Base URL, email, and API token</strong> — entered by the user in
+      Settings, used only to call that Jira instance's own REST API directly from the
+      browser</li>
+    <li>Jira issue, comment, attachment, and history data — fetched directly from the
+      user's own Jira instance and displayed in the side panel</li>
+    <li>Optionally, PTT login credentials — entered by the user in Settings for
+      auto-login convenience</li>
+    <li>Web page content from <strong>live.pttgps.vip</strong> (the "Ticket ID" /
+      "New Ticket ID" field text), read using the user's existing login session, to
+      power the Jira↔PTT lookup</li>
+    <li>Sign-in state, Jira/PTT settings, and cached issue data, stored locally via
+      <code>chrome.storage.local</code></li>
+  </ul>
+
+  <h2>3. Data We Do NOT Collect</h2>
+  <p>The Extension does <strong>not</strong>:</p>
+  <ul>
+    <li>Store, log, or retain your Google account email, Jira credentials, or Jira/PTT
+      data on any server operated by the developer</li>
+    <li>Collect, transmit, or share issue, comment, attachment, or PTT data with the
+      developer or any third party</li>
+    <li>Send Jira or PTT data to any server other than the user's own configured Jira
+      instance and live.pttgps.vip</li>
+    <li>Track user behavior or browsing history</li>
+    <li>Use analytics, advertising, or telemetry services</li>
+  </ul>
+
+  <h2>4. Sign-In &amp; Authorization (Google Group Check)</h2>
+  <p>
+    When you click "Sign in with Google," the Extension requests an access token via
+    Chrome's built-in Identity API (<code>chrome.identity</code>) with the
+    <code>userinfo.email</code> scope only — no other Google data is requested.
+  </p>
+  <p>
+    This token is sent to a Google Apps Script endpoint controlled by the developer,
+    which:
+  </p>
+  <ul>
+    <li>Verifies the token directly with Google's official token-info endpoint to
+      retrieve your email address</li>
+    <li>Checks whether that email address is a member of an authorized Google Group</li>
+    <li>Returns only an allow/deny result (and your email/name/picture for display in
+      the extension UI) — nothing is written to a database or stored server-side</li>
+  </ul>
+  <p>
+    If you are not a member of the authorized group, you will be shown a link to
+    request access. The Extension cannot be used without successful sign-in and group
+    verification.
+  </p>
+
+  <h2>5. Jira Credentials &amp; Data</h2>
+  <p>
+    Your Jira Base URL, email, and API token are stored only in this browser via
+    <code>chrome.storage.local</code> and are used exclusively to call your own Jira
+    Cloud instance's REST API directly from your browser (Basic authentication over
+    HTTPS). They are never sent to the developer or any server other than the Jira
+    instance you configured. You can remove them at any time from the extension's
+    Settings page.
+  </p>
+
+  <h2>6. Local Data Storage</h2>
+  <p>
+    Your sign-in status (email, name, picture), Jira/PTT settings, and cached issue
+    data are saved locally on your device using Chrome's built-in storage API
+    (<code>chrome.storage.local</code>) so they persist across browser sessions. This
+    data never leaves your device except for the direct API calls described above, and
+    can be cleared at any time via the extension's Settings or by removing the
+    extension.
+  </p>
+
+  <h2>7. Permissions Explanation</h2>
+  <ul>
+    <li><strong>identity</strong> — Required to sign in with Google and obtain an
+      access token for group-membership verification</li>
+    <li><strong>storage</strong> — Required to save and restore sign-in state, Jira/PTT
+      settings, and cached data locally on your device</li>
+    <li><strong>sidePanel</strong> — Required to render the extension's UI in Chrome's
+      side panel</li>
+    <li><strong>scripting</strong> — Required to read the "Ticket ID" field on the
+      active PTT task page for the Jira↔PTT lookup</li>
+    <li><strong>tabs / activeTab</strong> — Required to detect the active tab and open
+      PTT pages or the side panel</li>
+    <li><strong>clipboardWrite</strong> — Required for "click to copy" convenience
+      buttons</li>
+    <li><strong>host_permissions (live.pttgps.vip)</strong> — Required for PTT
+      auto-login and reading the Ticket ID field using your existing authenticated
+      session</li>
+    <li><strong>host_permissions (script.google.com / script.googleusercontent.com)</strong>
+      — Required to call the authorization endpoint that verifies Google Group
+      membership</li>
+    <li><strong>Optional host permission (your Jira domain)</strong> — Requested only
+      when you enter your Jira Base URL in Settings and click "Test Connection," so the
+      Extension can call that specific Jira instance's API on your behalf</li>
+  </ul>
+
+  <h2>8. Authentication to live.pttgps.vip and Jira</h2>
+  <p>
+    For PTT, the Extension uses your existing browser session (cookies) on
+    live.pttgps.vip, managed entirely by Chrome and the PTT platform; an optional
+    auto-login feature can fill the login form using credentials you save locally. For
+    Jira, the Extension authenticates directly to your Jira instance using the API
+    token you provide — the developer never sees or receives this token.
+  </p>
+
+  <h2>9. Contact</h2>
+  <p>
+    If you have questions about this privacy policy, please contact:<br>
+    <a href="mailto:kr-lge-content-ops@concentrix.com">Click to email</a>
+  </p>
+
+</body>
+</html>
