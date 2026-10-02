@@ -7,6 +7,8 @@ pages required by the Chrome Web Store listings for:
 - **PTT Search Hub** — [privacy-policy.html](https://aiwesley1971.github.io/ptt-bulk-task-search/privacy-policy.html)
 - **Mini Jira Sidebar** — [mini-jira-privacy-policy.html](https://aiwesley1971.github.io/ptt-bulk-task-search/mini-jira-privacy-policy.html)
 
-The actual extension source code for both projects lives in their own
-repositories (`ptt-search-hub`, `jira-client`). No application source, API
+- **PIM NPI Transfer** — [pim-npi-transfer-privacy-policy.html](https://aiwesley1971.github.io/ptt-bulk-task-search/pim-npi-transfer-privacy-policy.html)
+
+The actual extension source code for these projects lives in their own
+repositories (`ptt-search-hub`, `jira-client`, `pim-rpa`). No application source, API
 keys, or other project code is kept here.
